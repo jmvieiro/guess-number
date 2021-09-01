@@ -12,7 +12,6 @@ export const Card = (props) => {
 const styles = StyleSheet.create({
   card: {
     padding: 20,
-    paddingVertical: 40,
     alignItems: "center",
     shadowColor: COLORS.header,
     shadowOffset: { width: 0, height: 2 },
@@ -20,6 +19,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     elevation: 5,
     borderRadius: 10,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white,
   },
 });

@@ -1,113 +1,167 @@
-import React, { useState } from "react";
 import {
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
+import React, { useState } from "react";
 
 import COLORS from "../constants/colors";
-import { Card } from "./Card";
-import FONTS from "../assets/fonts";
+import { Card } from "../components/Card";
+import { Input } from "../components/Input";
+import { MAX_HEIGHT } from "../constants/props";
+import { NumberContainer } from "../components/NumberContainer";
 
-export const StartGameScreen = () => {
+export const StartGameScreen = ({ onStartGame }) => {
   const [inputError, setInputError] = useState("");
-  const [inputNumber, setInputNumber] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
+  const [enteredValue, setEnteredValue] = useState("");
+  const [selectedNumber, setSelectedNumber] = useState("");
 
-  const handleChangeNumber = (n) => setInputNumber(n);
+  const handleChangeNumber = (n) => {
+    setEnteredValue(n.replace(/[^0-9]/g, ""));
+  };
 
   const handleConfirm = () => {
-    if (inputNumber) {
-      setInputError("");
-    } else setInputError("Enter a number");
+    const chosenNumber = parseInt(enteredValue);
+    if (
+      !chosenNumber ||
+      chosenNumber === NaN ||
+      chosenNumber <= 0 ||
+      chosenNumber > 99
+    ) {
+      setInputError("Enter a valid number");
+      return;
+    }
+    setConfirmed(true);
+    setSelectedNumber(chosenNumber);
+    setEnteredValue("");
+    setInputError("");
   };
 
   const handleClean = () => {
-    setInputNumber("");
+    setConfirmed(false);
+    setEnteredValue("");
     setInputError("");
   };
 
   return (
-    <View style={styles.screen}>
-      <Text style={[styles.text, styles.title]}>Let's play!</Text>
-      <Card style={styles.inputContainer}>
-        <TextInput
-          keyboardType="numeric"
-          style={styles.inputText}
-          onChangeText={handleChangeNumber}
-          maxLength={2}
-          value={inputNumber}
-        />
-        <Text style={styles.inputError}>{inputError}</Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={handleClean}>
-            <View
-              style={[styles.button, { backgroundColor: COLORS.secondary }]}
-            >
-              <Text style={styles.text}>Clean</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleConfirm}>
-            <View style={[styles.button, { backgroundColor: COLORS.success }]}>
-              <Text style={styles.text}>Confirm</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-      </Card>
-    </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      keyboardVerticalOffset={30}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.screen}>
+            <Text style={[styles.text, styles.title]}>Let's play!</Text>
+            <Card style={styles.inputContainer}>
+              <Input
+                style={styles.inputText}
+                onChangeText={handleChangeNumber}
+                blurOnSubmit
+                autoCapitalization="none"
+                keyboardType="numeric"
+                maxLength={2}
+                autoCorrect={false}
+                value={enteredValue}
+              />
+              <Text style={styles.inputError}>{inputError}</Text>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity onPress={handleClean}>
+                  <View
+                    style={[
+                      styles.button,
+                      { backgroundColor: COLORS.secondary },
+                    ]}
+                  >
+                    <Text style={styles.text}>Clean</Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleConfirm}>
+                  <View
+                    style={[styles.button, { backgroundColor: COLORS.success }]}
+                  >
+                    <Text style={styles.text}>Confirm</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </Card>
+            {confirmed && (
+              <Card style={styles.inputContainer}>
+                <Text style={styles.title}>Selected number</Text>
+                <NumberContainer>{selectedNumber}</NumberContainer>
+                <TouchableOpacity onPress={() => onStartGame(selectedNumber)}>
+                  <View
+                    style={[styles.button, { backgroundColor: COLORS.success }]}
+                  >
+                    <Text style={styles.text}>Start game!</Text>
+                  </View>
+                </TouchableOpacity>
+              </Card>
+            )}
+          </View>
+        </TouchableWithoutFeedback>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   screen: {
     flex: 1,
     padding: 10,
     alignItems: "center",
   },
   title: {
-    fontSize: 22,
+    fontSize: Dimensions.get("window").height > MAX_HEIGHT ? 25 : 16,
     marginVertical: 10,
-    marginBottom: 20,
+    marginBottom: Dimensions.get("window").height > MAX_HEIGHT ? 20 : 10,
     color: "black",
   },
   inputText: {
-    borderColor: COLORS.primary,
-    borderWidth: 1,
     borderRadius: 6,
-    padding: 10,
-    marginBottom: 5,
-    width: 90,
-    height: 80,
-    fontSize: 50,
+    width: Dimensions.get("window").height > MAX_HEIGHT ? 90 : 50,
+    height: Dimensions.get("window").height > MAX_HEIGHT ? 80 : 50,
+    fontSize: Dimensions.get("window").height > MAX_HEIGHT ? 50 : 20,
     textAlign: "center",
   },
   inputContainer: {
-    width: 300,
-    maxWidth: "80%",
-    backgroundColor: COLORS.white,
+    width: "80%",
+    maxWidth: "95%",
+    minWidth: 200,
+    marginBottom: Dimensions.get("window").height > MAX_HEIGHT ? 20 : 10,
+    marginTop: Dimensions.get("window").height > MAX_HEIGHT ? 10 : 0,
   },
   buttonContainer: {
     flexDirection: "row",
-    width: "100%",
     justifyContent: "space-between",
     paddingHorizontal: 15,
-    marginTop: 20,
+    marginTop: Dimensions.get("window").height > MAX_HEIGHT ? 20 : 10,
   },
   button: {
     color: "white",
     alignItems: "center",
     padding: 10,
     borderRadius: 6,
-    width: 100,
+    marginLeft: 3,
+    width: Dimensions.get("screen").width / 3,
   },
   text: {
     color: COLORS.white,
-    fontFamily: FONTS.primary,
-    fontSize: 17,
+    fontFamily: "OpenSans-Bold",
+    fontSize: Dimensions.get("window").height > MAX_HEIGHT ? 20 : 12,
   },
   inputError: {
-    fontFamily: FONTS.primary,
     color: "red",
   },
 });

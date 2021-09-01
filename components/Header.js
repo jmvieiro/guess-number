@@ -1,7 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 
 import COLOR from "../constants/colors";
-import FONTS from "../assets/fonts";
 import React from "react";
 
 export const Header = ({ title }) => {
@@ -15,7 +14,7 @@ export const Header = ({ title }) => {
 const styles = StyleSheet.create({
   headerContainer: {
     width: "100%",
-    paddingTop: 35,
+    paddingTop: Platform.OS === "android" ? 20 : 5,
     height: 80,
     backgroundColor: COLOR.header,
     alignItems: "center",
@@ -23,7 +22,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: COLOR.white,
-    fontFamily: FONTS.primary,
-    fontSize: 30,
+    fontSize: Platform.OS === "android" ? 30 : 45,
   },
 });
